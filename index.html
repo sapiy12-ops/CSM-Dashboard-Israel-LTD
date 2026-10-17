@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CSM Dashboard – Israel LTD</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<style>
+:root{--bg:#f7f7f5;--sf:#fff;--bd:#e6e6e1;--tx:#1f2328;--mu:#6b7280;--g:#15803d;--gb:#e8f5ec;--y:#a16207;--yb:#fdf3d8;--r:#b91c1c;--rb:#fde8e8;--ac:#3b4cca;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171a;--sf:#1e2125;--bd:#31353b;--tx:#e8eaed;--mu:#9aa0a8;--g:#5fd08a;--gb:#17301f;--y:#e6b84d;--yb:#352c12;--r:#f28b8b;--rb:#3a1d1d;--ac:#8d9bff}}
+:root[data-theme="dark"]{--bg:#15171a;--sf:#1e2125;--bd:#31353b;--tx:#e8eaed;--mu:#9aa0a8;--g:#5fd08a;--gb:#17301f;--y:#e6b84d;--yb:#352c12;--r:#f28b8b;--rb:#3a1d1d;--ac:#8d9bff}
+html,body{height:auto}body{margin:0;background:var(--bg);color:var(--tx);font-family:'Heebo',system-ui,sans-serif}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:8px}
+.mu{color:var(--mu)}.bd{border-color:var(--bd)}
+.s-g{color:var(--g);background:var(--gb)}.s-y{color:var(--y);background:var(--yb)}.s-r{color:var(--r);background:var(--rb)}
+.s-n{color:var(--mu);background:var(--bg)}.d-n{background:var(--mu)}
+.d-g{background:var(--g)}.d-y{background:var(--y)}.d-r{background:var(--r)}
+button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useMemo} = React;
+const ST = {g:'תקין',y:'אזהרה',r:'חריג'};
+
+const STAGES = [
+{k:'1',range:'חודשים 1–3',name:'הטמעה והקמה',health:72,
+ mgmt:[['הקמת משתמשים','30/30','g'],['היררכיה ארגונית','הושלמה','g'],['פניות תמיכה / הדרכות','15 פניות · 4 הדרכות','g'],['פניות פתוחות','1','g'],['פעילות ב-7 ימים אחרונים','90%','g']],
+ board:[['התחברות ראשונית','84%','y'],['שימוש מחשב / נייד','68% / 42%','g'],['צפייה בחומרי הפגישות','50%','y'],['פעילות ב-7 ימים אחרונים','59%','y']],
+ goals:[['הקמת משתמשים',30,30,'משתמשים'],['בניית היררכיה ארגונית',1,1,'הושלמה'],['התחברות ראשונית',84,100,'%']],
+ ex:[
+ {t:'התחברות ראשונית 84% (יעד 100%)',s:'y',pb:'שליחת רשימת הדירקטורים שלא התחברו לשמחה והצעת מדריך וידאו קצר להתחברות מהנייד.',a:['שלח רשימה לשמחה','שלח מדריך וידאו']},
+ {t:'צפייה בחומרי הפגישות נמוכה (50%)',s:'y',pb:'פנייה לשמחה להפעלת תזכורות לדירקטורים לפני הפגישות.',a:['פנה לשמחה','שלח תזכורת לדירקטורים']}]},
+{k:'2',range:'חודשים 4–5',name:'שגרה ואימוץ',health:78,
+ mgmt:[['ניהול פגישות במערכת','90%','g'],['העלאת סדר יום','50%','y'],['אחוזי העלאת מסמכים','100%','g'],['פניות תמיכה / הדרכות','13 פניות · 2 הדרכות','g'],['פניות פתוחות','3','y'],['פעילות ב-7 ימים אחרונים','ממתין לנתון','n']],
+ board:[['התחברות ראשונית','100%','g'],['קריאה מוקדמת לקראת פגישות','67%','y'],['שימוש מחשב / נייד','68% / 42%','g'],['פעילות ב-7 ימים אחרונים','ממתין לנתון','n']],
+ goals:[['התחברות ראשונית (כולם)',100,100,'%'],['ניהול פגישות במערכת',90,100,'%'],['מוכנות לקראת פגישה: הנהלה',86,100,'%'],['מוכנות לקראת פגישה: דירקטורים',67,100,'%']],
+ ex:[
+ {t:'מוכנות לקראת פגישה: הנהלה 86% (יעד 100%)',s:'y',pb:'פנייה לשמחה לסיוע בהכנת הפגישה: קישור לפגישה, חומרים רלוונטיים וסדר יום.',a:['פנה לשמחה']},
+ {t:'מוכנות לקראת פגישה: דירקטורים 67% (יעד 100%)',s:'y',pb:'המלצה לשמחה על הפעלת תזכורות אוטומטיות 3 ימים לפני הפגישה.',a:['המלץ על תזכורות','שלח מדריך הגדרה']}]},
+{k:'3',range:'חודשים 6–7',name:'סקירת אמצע שנה',health:81,
+ mgmt:[['מענה על משוב','100%','g'],['העלאת סדר יום','70%','y'],['אחוזי העלאת מסמכים','100%','g'],['פניות תמיכה / הדרכות','8 פניות · 1 הדרכה','g'],['פניות פתוחות','0','g'],['פעילות ב-7 ימים אחרונים','ממתין לנתון','n']],
+ board:[['מענה על משוב','90%','g'],['קריאה מוקדמת לקראת פגישות','67%','y'],['שימוש מחשב / נייד','68% / 42%','g'],['פעילות ב-7 ימים אחרונים','ממתין לנתון','n']],
+ goals:[['מענה על משוב: הנהלה',100,100,'%'],['מענה על משוב: דירקטורים',90,100,'%'],['שיחת אמצע שנה (שמחה + רועי)',1,1,'שיחות'],['ניהול פגישות במערכת',90,100,'%'],['מוכנות לקראת פגישה: הנהלה',92,100,'%'],['מוכנות לקראת פגישה: דירקטורים',79,100,'%']],
+ findings:[['הוספת אישור קריאת מסמך ע"י דירקטורים',''],['הוספת שורת הערה','אפשרות לדירקטורים להוסיף הערה למסמך במידת הצורך'],['התראה 3 ימים לפני פגישה (דירקטורים)','קישור לחומרים הרלוונטיים ותזכורת לאישור קריאה'],['התראה 7 ימים לפני פגישה (הנהלה)','הכנת קישור לפגישה והעלאת חומרים']],
+ ex:[
+ {t:'מוכנות לקראת פגישה: הנהלה 92% (יעד 100%)',s:'y',pb:'פנייה לשמחה לסיוע בהכנת הפגישה: קישור לפגישה, חומרים רלוונטיים וסדר יום.',a:['פנה לשמחה']},
+ {t:'מוכנות לקראת פגישה: דירקטורים 79% (יעד 100%)',s:'y',pb:'המלצה לשמחה על הפעלת תזכורות אוטומטיות לדירקטורים לפני הפגישה.',a:['המלץ על תזכורות','שלח מדריך הגדרה']},
+ {t:'קריאה מוקדמת לקראת פגישות 67% (דירקטורים)',s:'y',pb:'הטמעת ההתראות מהממצאים (3 ימים לדירקטורים, 7 ימים להנהלה) ומעקב אחר שיפור בקריאה המוקדמת.',a:['תאם הטמעה עם שמחה']}]},
+{k:'4',range:'חודשים 8–10',name:'העמקת שימוש והכנה לחידוש',
+ mgmt:[['ניהול פגישות במערכת','ממתין לנתון','n'],['העלאת סדר יום','ממתין לנתון','n'],['אחוזי העלאת מסמכים','ממתין לנתון','n'],['פניות תמיכה / הדרכות','ממתין לנתון','n'],['פעילות ב-7 ימים אחרונים','ממתין לנתון','n']],
+ board:[['אישור קריאת מסמך','ממתין לנתון','n'],['אחוזי כתיבת הערות במסמך','ממתין לנתון','n'],['כניסה להתראה לקראת פגישה','ממתין לנתון','n'],['שימוש מחשב / נייד','ממתין לנתון','n'],['פעילות ב-7 ימים אחרונים','ממתין לנתון','n']],
+ goals:[['ניהול פגישות במערכת',null,100,'%'],['מוכנות לקראת פגישה: הנהלה',null,100,'%'],['מוכנות לקראת פגישה: דירקטורים',null,100,'%'],['אישורי קריאת מסמכים',null,100,'%']],
+ ex:[]},
+{k:'5',range:'חודשים 11–12',name:'סיכום שנה, חידוש והרחבה',
+ mgmt:[['משוב סגירת שנה','ממתין לנתון','n'],['נפח חומרים מול חודשים 4–5','ממתין לנתון','n'],['אחוזי העלאת מסמכים','ממתין לנתון','n'],['פניות תמיכה / הדרכות','ממתין לנתון','n'],['פניות פתוחות','ממתין לנתון','n'],['פעילות ב-7 ימים אחרונים','ממתין לנתון','n']],
+ board:[['משוב שביעות רצון שנתית','ממתין לנתון','n'],['אחוזי שימוש ביחס לחודשים 4–5','ממתין לנתון','n'],['אחוז דירקטורים רדומים','ממתין לנתון','n'],['אישור קריאת מסמך','ממתין לנתון','n'],['כניסה להתראה לקראת פגישה','ממתין לנתון','n'],['שימוש מחשב / נייד','ממתין לנתון','n']],
+ goals:[],
+ compare:[['ניהול פגישות במערכת','90%',null],['מוכנות לקראת פגישה: הנהלה','86%',null],['מוכנות לקראת פגישה: דירקטורים','67%',null],['העלאת סדר יום','50%',null],['אחוזי העלאת מסמכים','100%',null],['קריאה מוקדמת לקראת פגישות (דירקטורים)','67%',null]],
+ ex:[]}
+];
+
+const hs = h => h>=80?'g':h>=70?'y':'r';
+const trend = (a,b) => {const d=parseFloat(b)-parseFloat(a);return d===0?'➖ ללא שינוי':(d>0?'▲ +':'▼ −')+Math.abs(d)+' נק׳';};
+const Pill = ({s,children}) => <span className={'inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full s-'+s}><i className={'w-1.5 h-1.5 rounded-full d-'+s}/>{children}</span>;
+
+function Metric({m}){return(
+ <div className="flex items-center justify-between gap-3 py-2.5 border-b bd last:border-0">
+  <span className="text-sm">{m[0]}</span>
+  <span className="flex items-center gap-2 text-sm font-medium whitespace-nowrap">{m[1]}<i className={'w-2 h-2 rounded-full d-'+m[2]}/></span>
+ </div>);}
+
+function Panel({title,who,rows}){return(
+ <section className="card p-4">
+  <h3 className="font-semibold text-[15px]" style={{color:'var(--ac)'}}>{title}</h3>
+  <p className="text-xs mu mb-2">{who}</p>
+  {rows.map(m=><Metric key={m[0]} m={m}/>)}
+ </section>);}
+
+function Goal({g}){
+ if(g[1]===null)return(<div className="py-2.5"><div className="flex justify-between text-sm mb-1.5"><span>{g[0]}</span><Pill s="n">ממתין לנתון</Pill></div><div className="h-1.5 rounded-full" style={{background:'var(--bd)'}}/></div>);
+ const pct=Math.min(100,Math.round(g[1]/g[2]*100));
+ const s=pct>=90?'g':pct>=60?'y':'r';
+ return(<div className="py-2.5">
+  <div className="flex justify-between text-sm mb-1.5"><span>{g[0]}</span><span className="font-medium">{g[1]} / {g[2]} <span className="mu text-xs">{g[3]}</span></span></div>
+  <div className="h-1.5 rounded-full" style={{background:'var(--bd)'}}><div className={'h-full rounded-full d-'+s} style={{width:pct+'%'}}/></div>
+ </div>);}
+
+function App(){
+ const [i,setI]=useState(2);
+ const [done,setDone]=useState({});
+ const [fdone,setFdone]=useState({});
+ const [filter,setFilter]=useState('all');
+ const [toast,setToast]=useState('');
+ const st=STAGES[i];
+ const exs=st.ex.map((e,j)=>({...e,id:i+'-'+j}));
+ const open=exs.filter(e=>!done[e.id]);
+ const shown=exs.filter(e=>filter==='all'?true:filter==='open'?!done[e.id]:!!done[e.id]);
+ const gd=st.goals.filter(g=>g[1]!==null);
+ const health=gd.length?Math.round(gd.reduce((a,g)=>a+Math.min(100,g[1]/g[2]*100),0)/gd.length):null;
+ const hc=health===null?'n':hs(health);
+ const hasRed=open.some(e=>e.s==='r');
+ const exN=st.summary?st.summary.filter((_,x)=>!fdone['s-'+x]).length:open.length;
+ const exC=st.summary?(exN?'y':'g'):(open.length===0?'g':hasRed?'r':'y');
+ const met=gd.filter(g=>g[1]>=g[2]).length;
+ const gC=!gd.length?'n':met===gd.length?'g':met>0?'y':'r';
+ const flash=m=>{setToast(m);setTimeout(()=>setToast(''),2200);};
+ const jump=id=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});};
+ const act=(e,a)=>{setDone(d=>({...d,[e.id]:a}));setToast('בוצע: '+a);setTimeout(()=>setToast(''),2200);};
+ return(
+ <div className="max-w-6xl mx-auto px-4 py-5 pb-24">
+  <header className="card p-4 mb-4 flex flex-wrap items-center gap-x-8 gap-y-3 justify-between">
+   <div>
+    <div className="text-sm font-semibold" dir="ltr" style={{textAlign:'right',color:'var(--ac)'}}>CSM | Boardirector</div>
+    <h1 className="text-2xl font-bold mt-1">Israel LTD</h1>
+    <div className="text-sm mu mt-1">חוזה 12 חודשים · רישוי שנתי 92,800 ₪ · מנהלת המערכת: שמחה רוטמן · איש קשר נוסף: רועי ששון</div>
+    <div className="text-sm mt-2"><span className="font-semibold">{st.range}</span> · {st.name}</div>
+   </div>
+   <div className="flex items-center gap-4">
+    <button onClick={()=>jump('exceptions')} className={'text-center rounded-lg px-4 py-2 min-w-[84px] s-'+exC} aria-label="מעבר לחריגים">
+     <div className="text-2xl font-bold leading-tight">{exN}</div><div className="text-xs">{st.summary?'משימות סיכום':'חריגים'}</div>
+    </button>
+    <button onClick={()=>jump('goals')} className={'text-center rounded-lg px-4 py-2 min-w-[84px] s-'+gC} aria-label="מעבר ליעדים">
+     <div className="text-2xl font-bold leading-tight">{gd.length?met+'/'+st.goals.length:'—'}</div><div className="text-xs">{st.compare?'השוואת נתונים':'יעדים הושגו'}</div>
+    </button>
+    <div className="text-center">
+     <div className={'w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold border-4 s-'+hc} style={{borderColor:'currentColor'}}>{health===null?'—':health}</div>
+     <div className="text-xs mt-1 mu" title="ממוצע אחוזי העמידה בכל היעדים בשלב">ציון בריאות</div>
+    </div>
+   </div>
+  </header>
+
+  <nav className="flex gap-1 overflow-x-auto mb-4 p-1 card" aria-label="שלבי מחזור חיים">
+   {STAGES.map((s,j)=>{const c=s.ex.filter((_,x)=>!done[j+'-'+x]).length;return(
+    <button key={s.k} onClick={()=>setI(j)} className={'flex-1 min-w-[110px] text-sm rounded-md px-3 py-2 text-center whitespace-nowrap '+(i===j?'font-semibold':'font-medium')} style={i===j?{color:'var(--ac)',boxShadow:'inset 0 0 0 2px var(--ac)'}:{color:'var(--mu)'}}>
+     {s.range}
+    </button>);})}
+  </nav>
+
+  <div className="grid md:grid-cols-2 gap-4 mb-4">
+   <Panel title="פאנל א': הנהלה ותפעול" who="שמחה רוטמן + צוות אדמיניסטרציה (7 משתמשים)" rows={st.mgmt}/>
+   <Panel title="פאנל ב': חברי הדירקטוריון" who="חברי דירקטוריון (23 משתמשים)" rows={st.board}/>
+  </div>
+
+  <section id="goals" className="card p-4 mb-4 scroll-mt-4">
+   {st.compare?<React.Fragment>
+    <h3 className="font-semibold text-[15px] mb-1">מדד השוואה מרכזי: חודשים 4–5 מול חודשים 11–12</h3>
+    <p className="text-xs mu mb-2">הנתונים של חודשים 11–12 יוצגו כשיוזנו</p>
+    <div className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 text-xs mu py-1.5 border-b bd"><span>מדד השוואה מרכזי</span><span>ממוצע חודשים 4–5</span><span>ממוצע חודשים 11–12</span><span>מגמה / שינוי</span></div>
+    {st.compare.map(r=><div key={r[0]} className="grid grid-cols-[2fr_1fr_1fr_1fr] gap-2 items-center text-sm py-2.5 border-b bd last:border-0"><span>{r[0]}</span><span className="font-medium">{r[1]}</span><span>{r[2]===null?<Pill s="n">ממתין לנתון</Pill>:<span className="font-medium">{r[2]}</span>}</span><span>{r[2]===null?<Pill s="n">ממתין לנתון</Pill>:trend(r[1],r[2])}</span></div>)}
+   </React.Fragment>:<React.Fragment>
+    <h3 className="font-semibold text-[15px] mb-1">מעקב יעדים · {st.range}</h3>
+    <div className="grid md:grid-cols-3 gap-x-8">{st.goals.map(g=><Goal key={g[0]} g={g}/>)}</div>
+   </React.Fragment>}
+  </section>
+
+  {st.findings&&<section id="findings" className="card p-4 mb-4 scroll-mt-4">
+   <h3 className="font-semibold text-[15px]">ממצאים משיחת אמצע שנה</h3>
+   <p className="text-xs mu mb-3">שיחה מול שמחה רוטמן ורועי ששון · {st.findings.filter((_,x)=>fdone[i+'-'+x]).length} מתוך {st.findings.length} יושמו במערכת</p>
+   <ul className="space-y-2">{st.findings.map((f,x)=>{const k=i+'-'+x;const d=fdone[k];return(
+    <li key={k} className="border bd rounded-md p-3 flex items-start justify-between gap-3">
+     <div className="flex items-start gap-2"><Pill s={d?'g':'y'}>{d?'יושם':'בטיפול'}</Pill><div><div className="text-sm font-medium">{f[0]}</div>{f[1]&&<div className="text-xs mu mt-0.5">{f[1]}</div>}</div></div>
+     <button onClick={()=>setFdone(p=>({...p,[k]:!p[k]}))} className="text-xs font-medium px-3 py-1.5 rounded-md border bd whitespace-nowrap">{d?'בטל סימון':'סמן כיושם'}</button>
+    </li>);})}</ul>
+  </section>}
+
+  {!st.summary&&<section id="exceptions" className="card p-4 scroll-mt-4">
+   <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+    <h3 className="font-semibold text-[15px]">חריגים <span className="mu font-normal text-sm">({open.length} פתוחים מתוך {exs.length})</span></h3>
+    <div className="flex gap-1 text-xs">
+     {[['all','הכל'],['open','פתוחים'],['done','טופלו']].map(f=>
+      <button key={f[0]} onClick={()=>setFilter(f[0])} className="px-2.5 py-1 rounded-md border bd" style={filter===f[0]?{background:'var(--bg)',fontWeight:600}:{color:'var(--mu)'}}>{f[1]}</button>)}
+    </div>
+   </div>
+   {shown.length===0&&<p className="text-sm mu py-6 text-center">{exs.length===0?'אין נתונים בשלב זה עדיין. חריגים יופיעו כאן כשיוזנו נתונים.':'אין חריגים בתצוגה זו. עברו לשלב אחר או שנו את הסינון.'}</p>}
+   <ul className="space-y-2">
+    {shown.map(e=>{const d=done[e.id];return(
+     <li key={e.id} className="border bd rounded-md p-3 flex flex-col md:flex-row md:items-center gap-3" style={d?{opacity:.6}:{}}>
+      <div className="flex-1">
+       <div className="flex items-center gap-2 mb-1"><Pill s={d?'g':e.s}>{d?'טופל':ST[e.s]}</Pill><span className="font-medium text-sm">{e.t}</span></div>
+       <p className="text-sm mu"><b className="font-medium" style={{color:'var(--tx)'}}>פעולה מומלצת:</b> {e.pb}</p>
+       {d&&<p className="text-xs mt-1" style={{color:'var(--g)'}}>בוצע: {d}</p>}
+      </div>
+      {!d&&<div className="flex flex-wrap gap-2">{e.a.map(a=>
+       <button key={a} onClick={()=>act(e,a)} className="text-xs font-medium px-3 py-1.5 rounded-md" style={{background:'var(--ac)',color:'#fff'}}>{a}</button>)}
+      </div>}
+      {d&&<button onClick={()=>setDone(x=>{const n={...x};delete n[e.id];return n;})} className="text-xs mu underline">בטל סימון</button>}
+     </li>);})}
+   </ul>
+  </section>}
+  {st.compare&&<section className="card p-4 mt-4">
+   <h3 className="font-semibold text-[15px]">הצעות לשיפור התהליך והוספת פיצ׳רים</h3>
+   <p className="text-xs mu mb-3">הצעות לדיון מול שמחה ורועי לקראת השנה הבאה</p>
+   <div className="grid md:grid-cols-2 gap-4">
+   {[['שיפורי תהליך',[['נקודת בקרה חודשית קבועה','יצירת קשר פעם בחודש לבדיקת שטח מול שמחה, ובהתאם לממצאים קביעת פגישה.'],['סף חריגים ברור','חריג נפתח כשמדד נמצא מתחת ליעד שבועיים ברציפות, כדי לא להגיב לתנודות חד־פעמיות.'],['טיפול אישי בדירקטורים רדומים','רשימה דו-שבועית של דירקטורים שלא נכנסו, שליחת פנייה אישית, ובהתאם למענה יצירת קשר.'],['מדידת השפעה של כל פעולה','לכל פעולה שמירה של מדד לפני ואחרי, והשוואה בין הפרשי חודשים.'],['בניית סיכום הערך לאורך השנה','לצבור נתוני חיסכון ומעורבות כבר מחודש 8, ולא להרכיב אותם רק לפני שיחת החידוש.']]],['פיצ׳רים מוצעים',[['יומן פעולות שנשמר','כרגע סימוני "בוצע" נעלמים ברענון. שמירה תאפשר היסטוריה של מי עשה מה ומתי.'],['גרף מגמה לכל מדד','תצוגה קטנה של השינוי לאורך כל חמשת השלבים, במקום מספר בודד.'],['דשבורד מותאם למנהלי המערכת','בדומה לדשבורד הקיים, רק עם הנתונים הרלוונטיים לשמחה, כדי שתהיה לה תצוגה מלאה בדף אחד.'],['דף סיכום שנתי וארכיון','הסיכום נשאר בתוך המערכת: דף סיכום שנתי שנשמר בארכיון, כולל טבלת ההשוואה, לצפייה בכל עת.'],['התראה על ירידה במדד','הודעה אוטומטית ל-CSM כשמדד חוצה את סף האזהרה או החריגה.']]]].map(g=><div key={g[0]}><h4 className="text-sm font-semibold mb-2" style={{color:'var(--ac)'}}>{g[0]}</h4><ul className="space-y-2">{g[1].map(x=><li key={x[0]} className="border bd rounded-md p-3"><div className="text-sm font-medium">{x[0]}</div><div className="text-xs mu mt-0.5">{x[1]}</div></li>)}</ul></div>)}
+   </div>
+  </section>}
+  {toast&&<div role="status" className="fixed bottom-6 left-1/2 -translate-x-1/2 text-sm px-4 py-2 rounded-md shadow-lg" style={{background:'var(--tx)',color:'var(--bg)',marginBottom:'env(safe-area-inset-bottom,0px)'}}>{toast}</div>}
+ </div>);
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
